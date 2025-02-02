@@ -15,8 +15,8 @@ HUNTER_COLOR = (245, 0, 29)
 EXPLOSION_COLOR = (255, 103, 0)
 BACKGROUND_COLOR = (31, 31, 31)
 BORDER_COLOR = (28, 28, 28)
-PLAYER_SIZE = 20
-HUNTER_SIZE = 30
+PLAYER_SIZE = 50
+HUNTER_SIZE = 200
 FONT_SIZE = 30
 PUSH_DISTANCE = 120
 PLAYER_BASE_SPEED = 3
@@ -28,6 +28,7 @@ LEVELS_COUNT = 3
 HIGHSCORE_FILE = "highscore.txt"
 MIN_HUNTER_DISTANCE = 150
 BORDER_SIZE = 50
+
 LEVEL_SETTINGS = {
     1: {"target_size": 40, "target_moves": True, "target_speed": 0, "score_multiplier": 1, "hunter_speed": 0,
         "hunter_enabled": False},
@@ -41,8 +42,8 @@ LEVEL_SETTINGS = {
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface([PLAYER_SIZE, PLAYER_SIZE])
-        self.image.fill(PLAYER_COLOR)
+        self.image = pygame.image.load("pictures/ping2.png") # Загружаем пингвина
+        self.image = pygame.transform.scale(self.image, (PLAYER_SIZE, PLAYER_SIZE))
         self.rect = self.image.get_rect(center=(WIDTH // 2, HEIGHT // 2))
         self.speed = [0, 0]
 
@@ -75,12 +76,12 @@ class Player(pygame.sprite.Sprite):
 class Target(pygame.sprite.Sprite):
     def __init__(self, size, speed, moves=True):
         super().__init__()
-        self.image = pygame.Surface([size, size])
-        self.image.fill(TARGET_COLOR)
+        self.image = pygame.image.load("pictures/fish.png") # Загружаем рыбу
+        self.image = pygame.transform.scale(self.image, (size, size))
         self.rect = self.image.get_rect()
+        self.reset_position()
         self.speed = [random.choice([-1, 1]) * speed, random.choice([-1, 1]) * speed]
         self.moves = moves
-        self.reset_position()
 
     def reset_position(self):
         self.rect.x = random.randint(BORDER_SIZE, WIDTH - self.rect.width - BORDER_SIZE)
@@ -97,11 +98,12 @@ class Target(pygame.sprite.Sprite):
                 self.speed[1] *= -1
 
 
+
 class Hunter(pygame.sprite.Sprite):
     def __init__(self, speed):
         super().__init__()
-        self.image = pygame.Surface([HUNTER_SIZE, HUNTER_SIZE])
-        self.image.fill(HUNTER_COLOR)
+        self.image = pygame.image.load("pictures/hunter.png") # Загружаем охотника
+        self.image = pygame.transform.scale(self.image, (PLAYER_SIZE, PLAYER_SIZE))
         self.rect = self.image.get_rect()
         self.speed = speed
 
@@ -150,7 +152,6 @@ pygame.display.set_caption("Пингвийский Дрифт")
 clock = pygame.time.Clock()
 font = pygame.font.Font(None, FONT_SIZE)
 
-
 def load_best_score():
     try:
         with open(HIGHSCORE_FILE, "r") as file:
@@ -188,6 +189,12 @@ def game(level_num):
     target = Target(settings["target_size"], settings["target_speed"], settings["target_moves"])
     all_sprites = pygame.sprite.Group(player, target)
 
+    cursor_image = pygame.image.load("pictures/fan2.png")  # Меняем курсор на вентилятор
+    cursor_image = pygame.transform.scale(cursor_image, (90, 90))
+
+    background = pygame.image.load("pictures/fon.jpg")  # Загружаем фон 
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))  
+
     hunter = None
     if settings["hunter_enabled"]:
         hunter = Hunter(settings["hunter_speed"])
@@ -221,7 +228,9 @@ def game(level_num):
         if time.time() - start_time >= LEVEL_DURATION:
             running = False
 
-        screen.fill(BACKGROUND_COLOR)
+        # Отображаем фон
+        screen.blit(background, (0, 0))
+
         pygame.draw.rect(screen, BORDER_COLOR, (0, 0, BORDER_SIZE, HEIGHT))
         pygame.draw.rect(screen, BORDER_COLOR, (WIDTH - BORDER_SIZE, 0, BORDER_SIZE, HEIGHT))
         pygame.draw.rect(screen, BORDER_COLOR, (0, 0, WIDTH, BORDER_SIZE))
@@ -233,6 +242,10 @@ def game(level_num):
         draw_text(f"Счёт: {score}", 70, 30)
         draw_text(f"Время: {int(max(0, LEVEL_DURATION - (time.time() - start_time)))}", WIDTH - 70, 30)
         draw_text(f"Уровень: {level_num}", WIDTH // 2, 30)
+
+        pygame.mouse.set_visible(False)  # Скрываем дефолтный курсор
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        screen.blit(cursor_image, (mouse_x - cursor_image.get_width() // 2, mouse_y - cursor_image.get_height() // 2))  # показываем вентилятор
 
         pygame.display.flip()
         clock.tick(FPS)
@@ -261,4 +274,5 @@ else:
     text_lines = ["Игра окончена", f"Ваш счёт: {total_score}", f"Лучший счет: {best_score}",
                   "Нажмите любую кнопку, чтобы продолжить"]
 display_screen(text_lines)
+
 pygame.quit()
