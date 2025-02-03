@@ -4,45 +4,18 @@ import time
 import math
 import sys
 
+from constants import WIDTH, HEIGHT, FPS, WHITE, EXPLOSION_COLOR, BACKGROUND_COLOR, BORDER_COLOR, PLAYER_SIZE, \
+    HUNTER_SIZE, FONT_SIZE, \
+    PUSH_DISTANCE, PLAYER_BASE_SPEED, MAX_SPEED_MULTIPLIER, INERTIA_DECAY, PUSH_FACTOR, LEVEL_DURATION, LEVELS_COUNT, \
+    HIGHSCORE_FILE, MIN_HUNTER_DISTANCE, BORDER_SIZE, FAN_SIZE, LEVEL_SETTINGS
+
 pygame.init()
-
-WIDTH, HEIGHT = 900, 700
-FPS = 60
-WHITE = (255, 255, 255)
-PLAYER_COLOR = (0, 162, 135)
-TARGET_COLOR = (255, 162, 0)
-HUNTER_COLOR = (245, 0, 29)
-EXPLOSION_COLOR = (255, 103, 0)
-BACKGROUND_COLOR = (31, 31, 31)
-BORDER_COLOR = (28, 28, 28)
-PLAYER_SIZE = 50
-HUNTER_SIZE = 200
-FONT_SIZE = 30
-PUSH_DISTANCE = 120
-PLAYER_BASE_SPEED = 3
-MAX_SPEED_MULTIPLIER = 2
-INERTIA_DECAY = 0.95
-PUSH_FACTOR = 0.1
-LEVEL_DURATION = 30
-LEVELS_COUNT = 3
-HIGHSCORE_FILE = "highscore.txt"
-MIN_HUNTER_DISTANCE = 150
-BORDER_SIZE = 50
-
-LEVEL_SETTINGS = {
-    1: {"target_size": 40, "target_moves": True, "target_speed": 0, "score_multiplier": 1, "hunter_speed": 0,
-        "hunter_enabled": False},
-    2: {"target_size": 30, "target_moves": False, "target_speed": 0, "score_multiplier": 2, "hunter_speed": 1,
-        "hunter_enabled": True},
-    3: {"target_size": 20, "target_moves": True, "target_speed": 2, "score_multiplier": 3, "hunter_speed": 2,
-        "hunter_enabled": True}
-}
 
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load("pictures/ping2.png") # Загружаем пингвина
+        self.image = pygame.image.load("pictures/ping2.png")  # Загружаем пингвина
         self.image = pygame.transform.scale(self.image, (PLAYER_SIZE, PLAYER_SIZE))
         self.rect = self.image.get_rect(center=(WIDTH // 2, HEIGHT // 2))
         self.speed = [0, 0]
@@ -76,7 +49,7 @@ class Player(pygame.sprite.Sprite):
 class Target(pygame.sprite.Sprite):
     def __init__(self, size, speed, moves=True):
         super().__init__()
-        self.image = pygame.image.load("pictures/fish.png") # Загружаем рыбу
+        self.image = pygame.image.load("pictures/fish.png")  # Загружаем рыбу
         self.image = pygame.transform.scale(self.image, (size, size))
         self.rect = self.image.get_rect()
         self.reset_position()
@@ -98,12 +71,11 @@ class Target(pygame.sprite.Sprite):
                 self.speed[1] *= -1
 
 
-
 class Hunter(pygame.sprite.Sprite):
     def __init__(self, speed):
         super().__init__()
-        self.image = pygame.image.load("pictures/hunter.png") # Загружаем охотника
-        self.image = pygame.transform.scale(self.image, (PLAYER_SIZE, PLAYER_SIZE))
+        self.image = pygame.image.load("pictures/hunter.png")  # Загружаем охотника
+        self.image = pygame.transform.scale(self.image, (HUNTER_SIZE, HUNTER_SIZE))
         self.rect = self.image.get_rect()
         self.speed = speed
 
@@ -152,6 +124,7 @@ pygame.display.set_caption("Пингвийский Дрифт")
 clock = pygame.time.Clock()
 font = pygame.font.Font(None, FONT_SIZE)
 
+
 def load_best_score():
     try:
         with open(HIGHSCORE_FILE, "r") as file:
@@ -190,10 +163,10 @@ def game(level_num):
     all_sprites = pygame.sprite.Group(player, target)
 
     cursor_image = pygame.image.load("pictures/fan2.png")  # Меняем курсор на вентилятор
-    cursor_image = pygame.transform.scale(cursor_image, (90, 90))
+    cursor_image = pygame.transform.scale(cursor_image, (FAN_SIZE, FAN_SIZE))
 
     background = pygame.image.load("pictures/fon.jpg")  # Загружаем фон 
-    background = pygame.transform.scale(background, (WIDTH, HEIGHT))  
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
     hunter = None
     if settings["hunter_enabled"]:
@@ -245,7 +218,8 @@ def game(level_num):
 
         pygame.mouse.set_visible(False)  # Скрываем дефолтный курсор
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        screen.blit(cursor_image, (mouse_x - cursor_image.get_width() // 2, mouse_y - cursor_image.get_height() // 2))  # показываем вентилятор
+        screen.blit(cursor_image, (
+            mouse_x - cursor_image.get_width() // 2, mouse_y - cursor_image.get_height() // 2))  # показываем вентилятор
 
         pygame.display.flip()
         clock.tick(FPS)
